@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HimanshuOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1226;
+    --muted:#cbd5e1;
+    --card:#ffffff06;
+    --accent:#7dd3fc;
+    --radius:14px;
+    --shadow: 0 6px 30px rgba(2,6,23,0.6);
+    --ease: cubic-bezier(.2,.9,.3,1);
+    --fs: 14px;
+  }
+  [data-theme="light"]{
+    --bg: #f6f8fb;
+    --muted: #1e293b;
+    --card: rgba(3,7,18,0.04);
+    --accent: #2563eb;
+  }
+  [data-theme="soft"]{
+    --bg: linear-gradient(180deg,#0b1020 0%, #151428 100%);
+    --muted: #e6f0ff;
+    --card: rgba(255,255,255,0.03);
+    --accent: #f97316;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--muted);background:var(--bg);overflow:hidden;font-size:var(--fs)}
+  /* Splash / boot */
+  .splash {position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;background:linear-gradient(180deg, rgba(8,12,30,1), rgba(5,8,18,0.95));z-index:9999;backdrop-filter:blur(6px);transition:opacity .8s var(--ease), transform .8s var(--ease);}
+  .splash.hidden{opacity:0;pointer-events:none;transform:scale(.98)}
+  .boot-card{width:340px;padding:28px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.04);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .logo {width:84px;height:84px;border-radius:20px;background:linear-gradient(135deg,#64f0ff 0%, #9b8bff 60%);display:grid;place-items:center;font-weight:800;color:#051024;font-size:34px;letter-spacing:0.5px;box-shadow:0 8px 30px rgba(99,102,241,0.18), inset 0 2px 10px rgba(255,255,255,0.08);}
+  .boot-text{font-weight:600;color:#dbeafe}
+  .boot-sub{font-size:13px;color:#9fb3c8}
+  .boot-progress{width:260px;height:6px;border-radius:999px;background:rgba(255,255,255,0.03);overflow:hidden}
+  .boot-progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#69e6ff,#a98bff);border-radius:999px;transition:width 1.8s var(--ease)}
+  /* Desktop */
+  .desktop {position:relative;width:100%;height:100%;padding:36px;display:grid;grid-template-columns:1fr auto;gap:12px;background:var(--bg);}
+  .desktop-grid{display:flex;flex-wrap:wrap;align-content:flex-start;gap:18px;padding:20px 10px}
+  .icon {width:92px;padding:10px;border-radius:12px;background:var(--card);backdrop-filter:blur(6px);text-align:center;cursor:pointer;transition:transform .18s var(--ease), box-shadow .18s var(--ease);}
+  .icon:hover{transform:translateY(-6px);box-shadow:0 14px 40px rgba(3,8,20,0.45)}
+  .icon .glyph{width:56px;height:56px;border-radius:10px;margin:0 auto 8px;display:grid;place-items:center;font-size:20px;background:linear-gradient(135deg,#ffffff12, #ffffff06);color:var(--accent)}
+  .icon .label{font-size:13px;color:var(--muted);font-weight:600}
+  .widgets{display:flex;flex-direction:column;gap:12px;align-items:flex-end;padding:18px}
+  .widget {min-width:260px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(8px)}
+  .widget h4{margin:0;color:#dbeafe;font-weight:700}
+  .widget p{margin:6px 0 0;color:#a9c0d5;font-size:13px}
+  /* Taskbar */
+  .taskbar {position:fixed;left:18px;right:18px;bottom:18px;height:56px;border-radius:14px;background:linear-gradient(180deg, rgba(3,6,20,0.6), rgba(3,6,20,0.5));display:flex;align-items:center;gap:14px;padding:8px 12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(10px)}
+  .start{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg, rgba(125,211,252,0.14), rgba(167,139,255,0.14));display:grid;place-items:center;cursor:pointer}
+  .task-center{display:flex;gap:10px;align-items:center;flex:1}
+  .tray{display:flex;gap:10px;align-items:center;color:#9fb3c8;font-weight:600}
+  .clock{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:600}
+  /* Windows */
+  .window {position:absolute;width:520px;min-height:320px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 60px rgba(2,6,23,0.6);overflow:hidden;transform-origin:center;opacity:0;transform:translateY(12px) scale(.98);transition:transform .22s var(--ease),opacity .22s var(--ease),box-shadow .22s var(--ease);}
+  .window.open{opacity:1;transform:translateY(0) scale(1)}
+  .titlebar{height:48px;padding:8px 12px;display:flex;align-items:center;gap:10px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(255,255,255,0.01));border-bottom:1px solid rgba(255,255,255,0.02)}
+  .titlebar .title{font-weight:700;color:#dbeafe}
+  .titlebar .controls{margin-left:auto;display:flex;gap:8px}
+  .btn{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;cursor:pointer;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
+  .content-area{padding:14px;color:#bcd5ea}
+  .term{background:#081026;padding:12px;border-radius:8px;min-height:240px;color:#a7f3d0;font-family:monospace;font-size:13px;overflow:auto}
+  .files{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .filecard{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center}
+  .music-player{display:flex;gap:12px;align-items:center}
+  .music-cover{width:92px;height:92px;border-radius:10px;background:linear-gradient(135deg,#7dd3fc33,#a78bff33);display:grid;place-items:center;font-weight:800}
+  .controls-row{display:flex;gap:8px;align-items:center}
+  .big-btn{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg,#7dd3fc33,#a78bff33);display:grid;place-items:center;cursor:pointer}
+  .small{font-size:13px;color:#a9c0d5}
+  .settings-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+  input[type="range"]{width:150px}
+  label{font-weight:600;color:var(--muted)}
+  .color-swatch{width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,0.15);display:inline-block;vertical-align:middle;margin-left:8px}
+  @media (max-width:900px){.window{width:92vw;left:4vw;right:4vw}}
+  button{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);background:transparent;color:var(--muted);cursor:pointer}
+  /* small form styles */
+  .form {display:flex;flex-direction:column;gap:12px}
+  .row{display:flex;gap:12px;align-items:center}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- Splash / boot -->
+<div class="splash" id="splash">
+  <div class="boot-card">
+    <div class="logo">H</div>
+    <div class="boot-text">HimanshuOS</div>
+    <div class="boot-sub" id="bootSub">Personal interface by Himanshu — Starting up</div>
+    <div class="boot-progress"><i id="bootBar"></i></div>
+    <div class="small">Loading modules · animations · UI</div>
+  </div>
+</div>
+
+<!-- Desktop -->
+<div id="desktop" class="desktop" style="visibility:hidden">
+
+  <div class="desktop-grid" id="icons">
+    <div class="icon" data-app="explorer" title="File Explorer">
+      <div class="glyph">📁</div>
+      <div class="label">Explorer</div>
+    </div>
+
+    <div class="icon" data-app="terminal" title="Terminal">
+      <div class="glyph">⌘</div>
+      <div class="label">Terminal</div>
+    </div>
+
+    <div class="icon" data-app="music" title="Music Player">
+      <div class="glyph">♪</div>
+      <div class="label">Music</div>
+    </div>
+
+    <div class="icon" data-app="calc" title="Calculator">
+      <div class="glyph">∑</div>
+      <div class="label">Calculator</div>
+    </div>
+
+    <div class="icon" data-app="notes" title="Notes">
+      <div class="glyph">✎</div>
+      <div class="label">Notes</div>
+    </div>
+
+    <div class="icon" data-app="settings" title="Settings">
+      <div class="glyph">⚙️</div>
+      <div class="label">Settings</div>
+    </div>
+  </div>
+
+  <div class="widgets">
+    <div class="widget">
+      <h4>Welcome, Himanshu</h4>
+      <p>Build, prototype, and polish. Click icons to open apps.</p>
+    </div>
+
+    <div class="widget">
+      <h4>Quick Tips</h4>
+      <p>Drag windows by titlebar. Use the Start button for apps and settings.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Taskbar -->
+<div class="taskbar">
+  <div class="start" id="startBtn" title="Start menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" fill="#0b1222"/></svg>
+  </div>
+
+  <div class="task-center" id="taskCenter"></div>
+
+  <div class="tray">
+    <div class="clock" id="clock">--:--</div>
+  </div>
+</div>
+
+<!-- Windows: Explorer -->
+<div class="window" id="win-explorer" style="left:80px;top:80px;">
+  <div class="titlebar" data-drag>
+    <div class="title">File Explorer</div>
+    <div class="controls">
+      <div class="btn" onclick="closeWin('win-explorer')">✕</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <div class="small">Mock files — use for demos</div>
+    <div class="files" style="margin-top:12px">
+      <div class="filecard">Projects</div>
+      <div class="filecard">Photos</div>
+      <div class="filecard">Music</div>
+      <div class="filecard">Notes</div>
+      <div class="filecard">Calculator</div>
+      <div class="filecard">Terminal</div>
+    </div>
+  </div>
+</div>
+
+<!-- Terminal -->
+<div class="window" id="win-terminal" style="left:140px;top:120px;width:620px;min-height:340px;">
+  <div class="titlebar" data-drag>
+    <div class="title">Terminal</div>
+    <div class="controls">
+      <div class="btn" onclick="closeWin('win-terminal')">✕</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <div class="term" id="terminalOutput" contenteditable="true" spellcheck="false">HimanshuOS Terminal
+> Type help and press Enter
+</div>
+  </div>
+</div>
+
+<!-- Music -->
+<div class="window" id="win-music" style="left:200px;top:170px;width:520px;">
+  <div class="titlebar" data-drag>
+    <div class="title">Music Player</div>
+    <div class="controls">
+      <div class="btn" onclick="closeWin('win-music')">✕</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <div class="music-player">
+      <div class="music-cover">H</div>
+      <div style="flex:1">
+        <div class="small">Track: Soft Prototype</div>
+        <div style="margin-top:12px" class="controls-row">
+          <div class="big-btn" id="playBtn" onclick="togglePlay()">▶</div>
+          <div class="small" id="playState">Stopped</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calculator -->
+<div class="window" id="win-calc" style="left:260px;top:210px;width:360px;height:420px;">
+  <div class="titlebar" data-drag>
+    <div class="title">Calculator</div>
+    <div class="controls">
+      <div class="btn" onclick="closeWin('win-calc')">✕</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <div id="calcDisplay" style="background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;font-weight:700;font-size:22px;text-align:right">0</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px">
+      <button onclick="calcPress('7')">7</button><button onclick="calcPress('8')">8</button><button onclick="calcPress('9')">9</button><button onclick="calcPress('/')">÷</button>
+      <button onclick="calcPress('4')">4</button><button onclick="calcPress('5')">5</button><button onclick="calcPress('6')">6</button><button onclick="calcPress('*')">×</button>
+      <button onclick="calcPress('1')">1</button><button onclick="calcPress('2')">2</button><button onclick="calcPress('3')">3</button><button onclick="calcPress('-')">−</button>
+      <button onclick="calcPress('0')">0</button><button onclick="calcPress('.')">.</button><button onclick="calcExec()">=</button><button onclick="calcPress('+')">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notes -->
+<div class="window" id="win-notes" style="left:320px;top:260px;width:520px;height:360px;">
+  <div class="titlebar" data-drag>
+    <div class="title">Notes</div>
+    <div class="controls">
+      <div class="btn" onclick="closeWin('win-notes')">✕</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <textarea id="noteArea" style="width:100%;height:220px;background:transparent;border:1px dashed rgba(255,255,255,0.03);color:#dfefff;padding:12px;border-radius:8px;font-size:14px">Hello Himanshu — your note space.</textarea>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="window" id="win-settings" style="left:380px;top:140px;width:540px;height:520px;">
+  <div class="titlebar" data-drag>
+    <div class="title">Settings</div>
+    <div class="controls">
+      <div class="btn" onclick="closeWin('win-settings')">✕</div>
+    </div>
+  </div>
+  <div class="content-area">
+    <div class="form">
+      <div>
+        <div style="font-weight:800;margin-bottom:8px">Appearance</div>
+        <div class="settings-row">
+          <label>Theme</label>
+          <div class="row">
+            <select id="themeSelect">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="soft">Soft Gradient</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <label>Font size</label>
+          <div class="row">
+            <input id="fontRange" type="range" min="12" max="20" step="1" />
+            <div id="fontVal" class="small"></div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <label>Accent color</label>
+          <div class="row">
+            <input id="accentColor" type="color" value="#7dd3fc" />
+            <span id="sw" class="color-swatch"></span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-weight:800;margin:6px 0 8px">Extras</div>
+        <div class="settings-row">
+          <label>Boot sound</label>
+          <div class="row">
+            <input id="bootSound" type="checkbox" />
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <label>Show seconds</label>
+          <div class="row">
+            <input id="showSeconds" type="checkbox" />
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button id="saveBtn">Save</button>
+        <button id="restoreBtn">Restore defaults</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden boot audio -->
+<audio id="bootAudio" src=""></audio>
+
+<script>
+/* ---------- Boot animation ---------- */
+const splash = document.getElementById('splash');
+const bootBar = document.getElementById('bootBar');
+const desktop = document.getElementById('desktop');
+function runBoot(playSound){
+  bootBar.style.width = '68%';
+  setTimeout(()=> bootBar.style.width='92%', 900);
+  setTimeout(()=> {
+    splash.classList.add('hidden');
+    try{ if(playSound) document.getElementById('bootAudio').play().catch(()=>{}); }catch{}
+    setTimeout(()=> { splash.style.display='none'; desktop.style.visibility='visible'; }, 900);
+  }, 2100);
+}
+
+/* ---------- Settings default and persistence ---------- */
+const DEFAULTS = {
+  theme: 'dark',
+  fontSize: 14,
+  accent: '#7dd3fc',
+  bootSound: false,
+  showSeconds: false
+};
+
+function loadSettings(){
+  const raw = localStorage.getItem('himanshuos.settings');
+  if(!raw) return {...DEFAULTS};
+  try{ return {...DEFAULTS, ...JSON.parse(raw)} }catch{ return {...DEFAULTS}; }
+}
+function saveSettings(s){
+  localStorage.setItem('himanshuos.settings', JSON.stringify(s));
+}
+let SETTINGS = loadSettings();
+
+/* ---------- Apply settings to UI ---------- */
+function applySettings(){
+  // theme
+  document.body.setAttribute('data-theme', SETTINGS.theme === 'soft' ? 'soft' : (SETTINGS.theme === 'light' ? 'light' : 'dark'));
+  // font size
+  document.documentElement.style.setProperty('--fs', SETTINGS.fontSize + 'px');
+  // accent
+  document.documentElement.style.setProperty('--accent', SETTINGS.accent);
+  // accent applied in elements that use inline color (update dynamic swatches)
+  document.querySelectorAll('.glyph').forEach(g => { g.style.color = SETTINGS.accent; });
+  document.querySelectorAll('.music-cover').forEach(c => { c.style.background = `linear-gradient(135deg, ${hexWithAlpha(SETTINGS.accent,0.18)}, ${hexWithAlpha(SETTINGS.accent,0.12)})`});
+  // clock seconds toggle
+  if(SETTINGS.showSeconds) showClockSeconds = true; else showClockSeconds = false;
+  // boot sound
+  document.getElementById('bootAudio').src = SETTINGS.bootSound ? '' : '';
+  // update UI controls if open
+  document.getElementById('themeSelect').value = SETTINGS.theme;
+  document.getElementById('fontRange').value = SETTINGS.fontSize;
+  document.getElementById('fontVal').textContent = SETTINGS.fontSize + 'px';
+  document.getElementById('accentColor').value = SETTINGS.accent;
+  document.getElementById('sw').style.background = SETTINGS.accent;
+  document.getElementById('bootSound').checked = SETTINGS.bootSound;
+  document.getElementById('showSeconds').checked = SETTINGS.showSeconds;
+}
+
+/* small helper: hex to rgba-ish with alpha */
+function hexWithAlpha(hex, a){
+  try{
+    const c = hex.replace('#','');
+    const r = parseInt(c.substring(0,2),16);
+    const g = parseInt(c.substring(2,4),16);
+    const b = parseInt(c.substring(4,6),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }catch{ return hex; }
+}
+
+/* ---------- Clock ---------- */
+let showClockSeconds = SETTINGS.showSeconds || false;
+function updateClock(){
+  const el = document.getElementById('clock');
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  const ss = String(d.getSeconds()).padStart(2,'0');
+  el.textContent = showClockSeconds ? `${hh}:${mm}:${ss}` : `${hh}:${mm}`;
+}
+setInterval(updateClock, 500);
+updateClock();
+
+/* ---------- Window manager helpers (fixed draggable) ---------- */
+const windows = Array.from(document.querySelectorAll('.window'));
+let zIndex = 50;
+windows.forEach(w=>{
+  makeDraggable(w);
+  w.classList.remove('open');
+});
+function openWin(id, bring=true){
+  const w = document.getElementById(id);
+  if(!w) return;
+  w.classList.add('open');
+  if(bring) bringToFront(w);
+  addTaskButton(w);
+}
+function closeWin(id){
+  const w = document.getElementById(id);
+  if(!w) return;
+  w.classList.remove('open');
+  removeTaskButton(w);
+}
+function bringToFront(win){
+  win.style.zIndex = ++zIndex;
+}
+
+/* ---------- Fixed draggable: ignores clicks on titlebar buttons ---------- */
+function makeDraggable(win){
+  const tb = win.querySelector('[data-drag]');
+  if(!tb) return;
+  tb.style.cursor='grab';
+  let isDown=false, startX, startY, ox, oy;
+  tb.addEventListener('pointerdown', (e)=>{
+    // prevent drag if clicking a control button or interactive element
+    if (e.target.closest('.btn') || e.target.closest('button') || e.target.closest('input') || e.target.closest('select') ) return;
+    isDown=true;
+    startX=e.clientX;
+    startY=e.clientY;
+    const rect = win.getBoundingClientRect();
+    ox = rect.left;
+    oy = rect.top;
+    bringToFront(win);
+    try { tb.setPointerCapture(e.pointerId); } catch {}
+  });
+  window.addEventListener('pointermove', (e)=>{
+    if(!isDown) return;
+    win.style.left = (ox + (e.clientX - startX)) + 'px';
+    win.style.top = (oy + (e.clientY - startY)) + 'px';
+  });
+  window.addEventListener('pointerup', (e)=> {
+    if(!isDown) return;
+    isDown=false;
+    try{ tb.releasePointerCapture(e.pointerId) }catch{}
+  });
+  win.addEventListener('pointerdown', ()=> bringToFront(win));
+}
+
+/* ---------- Desktop icon click to open apps ---------- */
+document.getElementById('icons').addEventListener('click', (e)=>{
+  const icon = e.target.closest('.icon');
+  if(!icon) return;
+  const app = icon.dataset.app;
+  if(app==='explorer') openWin('win-explorer');
+  if(app==='terminal') openWin('win-terminal');
+  if(app==='music') openWin('win-music');
+  if(app==='calc') openWin('win-calc');
+  if(app==='notes') openWin('win-notes');
+  if(app==='settings') openWin('win-settings');
+});
+
+/* ---------- Start button (quick menu) ---------- */
+const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('click', ()=>{
+  const existing = document.getElementById('startMenu');
+  if(existing){ existing.remove(); return; }
+  const menu = document.createElement('div');
+  menu.id = 'startMenu';
+  menu.style.position='fixed';
+  menu.style.bottom='86px';
+  menu.style.left='18px';
+  menu.style.padding='12px';
+  menu.style.width='220px';
+  menu.style.borderRadius='12px';
+  menu.style.background='linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
+  menu.style.border='1px solid rgba(255,255,255,0.03)';
+  menu.style.backdropFilter='blur(10px)';
+  menu.style.boxShadow='0 12px 40px rgba(2,6,23,0.5)';
+  menu.innerHTML = `
+    <div style="font-weight:700;color:#dbeafe;margin-bottom:8px">Himanshu</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="openWin('win-explorer');document.getElementById('startMenu')?.remove()">Explorer</button>
+      <button onclick="openWin('win-terminal');document.getElementById('startMenu')?.remove()">Terminal</button>
+      <button onclick="openWin('win-music');document.getElementById('startMenu')?.remove()">Music</button>
+      <button onclick="openWin('win-settings');document.getElementById('startMenu')?.remove()">Settings</button>
+    </div>
+  `;
+  document.body.appendChild(menu);
+  setTimeout(()=> {
+    const rm = (ev)=>{ if(!menu.contains(ev.target) && ev.target !== startBtn) { menu.remove(); window.removeEventListener('pointerdown', rm); } };
+    window.addEventListener('pointerdown', rm);
+  }, 30);
+});
+
+/* ---------- Taskbar app buttons ---------- */
+function addTaskButton(win){
+  const id = win.id;
+  if(document.getElementById('task-'+id)) return;
+  const btn = document.createElement('div');
+  btn.id = 'task-'+id;
+  btn.style.padding='8px 12px';
+  btn.style.borderRadius='8px';
+  btn.style.background='rgba(255,255,255,0.02)';
+  btn.style.marginRight='8px';
+  btn.style.cursor='pointer';
+  btn.textContent = win.querySelector('.titlebar .title').textContent;
+  btn.onclick = ()=> {
+    if(win.classList.contains('open')) closeWin(id); else openWin(id);
+  };
+  document.getElementById('taskCenter').appendChild(btn);
+}
+function removeTaskButton(win){
+  const b = document.getElementById('task-'+win.id);
+  if(b) b.remove();
+}
+
+/* ---------- Terminal simple commands ---------- */
+const term = document.getElementById('terminalOutput');
+term.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    const text = term.innerText.trim();
+    const lines = text.split('\n').filter(Boolean);
+    const last = lines[lines.length-1] || '';
+    runTermCmd(last.replace(/^> /,'').trim());
+  }
+});
+function printTerm(line){
+  term.innerText += '\n' + line;
+  term.scrollTop = term.scrollHeight;
+}
+function runTermCmd(cmd){
+  if(!cmd) { printTerm('> '); return; }
+  printTerm('> ' + cmd);
+  if(cmd === 'help'){
+    printTerm('commands: help, echo [text], clear, open [app], settings');
+  } else if(cmd.startsWith('echo ')){
+    printTerm(cmd.slice(5));
+  } else if(cmd === 'clear'){
+    term.innerText = 'HimanshuOS Terminal\n> ';
+  } else if(cmd.startsWith('open ')){
+    const app = cmd.split(' ')[1];
+    if(app === 'music') openWin('win-music');
+    else if(app === 'explorer') openWin('win-explorer');
+    else if(app === 'terminal') openWin('win-terminal');
+    else if(app === 'settings') openWin('win-settings');
+    else printTerm('Unknown app: ' + app);
+  } else {
+    printTerm('Unknown command. type help');
+  }
+  printTerm('> ');
+}
+
+/* ---------- Music mock ---------- */
+let playing = false;
+function togglePlay(){
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '▮▮' : '▶';
+  document.getElementById('playState').textContent = playing ? 'Playing' : 'Stopped';
+}
+
+/* ---------- Calculator ---------- */
+let calcBuffer = '';
+function calcPress(v){
+  calcBuffer += v;
+  document.getElementById('calcDisplay').textContent = calcBuffer;
+}
+function calcExec(){
+  try{
+    const safe = calcBuffer.replace(/[^0-9\+\-\*\/\.\(\)]/g,'');
+    const res = Function('"use strict";return (' + safe + ')')();
+    document.getElementById('calcDisplay').textContent = res;
+    calcBuffer = String(res);
+  }catch(e){
+    document.getElementById('calcDisplay').textContent = 'Error';
+    calcBuffer = '';
+  }
+}
+
+/* ---------- Settings UI wiring ---------- */
+const themeSelect = document.getElementById('themeSelect');
+const fontRange = document.getElementById('fontRange');
+const fontVal = document.getElementById('fontVal');
+const accentColor = document.getElementById('accentColor');
+const sw = document.getElementById('sw');
+const bootSound = document.getElementById('bootSound');
+const showSecondsInput = document.getElementById('showSeconds');
+
+function initSettingsUI(){
+  // populate controls
+  fontRange.min = 12; fontRange.max = 20; fontRange.step = 1;
+  themeSelect.value = SETTINGS.theme;
+  fontRange.value = SETTINGS.fontSize;
+  fontVal.textContent = SETTINGS.fontSize + 'px';
+  accentColor.value = SETTINGS.accent;
+  sw.style.background = SETTINGS.accent;
+  bootSound.checked = SETTINGS.bootSound;
+  showSecondsInput.checked = SETTINGS.showSeconds;
+
+  // live changes
+  themeSelect.addEventListener('change', ()=> {
+    SETTINGS.theme = themeSelect.value;
+    applySettings();
+  });
+  fontRange.addEventListener('input', ()=> {
+    SETTINGS.fontSize = parseInt(fontRange.value,10);
+    fontVal.textContent = SETTINGS.fontSize + 'px';
+    applySettings();
+  });
+  accentColor.addEventListener('input', ()=> {
+    SETTINGS.accent = accentColor.value;
+    sw.style.background = SETTINGS.accent;
+    applySettings();
+  });
+  bootSound.addEventListener('change', ()=> {
+    SETTINGS.bootSound = bootSound.checked;
+  });
+  showSecondsInput.addEventListener('change', ()=> {
+    SETTINGS.showSeconds = showSecondsInput.checked;
+    showClockSeconds = SETTINGS.showSeconds;
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', ()=>{
+    saveSettings(SETTINGS);
+    showQuickNotice('Settings saved');
+  });
+  document.getElementById('restoreBtn').addEventListener('click', ()=>{
+    SETTINGS = {...DEFAULTS};
+    applySettings();
+    saveSettings(SETTINGS);
+    showQuickNotice('Defaults restored');
+  });
+}
+
+/* small in-UI notice */
+function showQuickNotice(msg){
+  const n = document.createElement('div');
+  n.textContent = msg;
+  n.style.position='fixed';
+  n.style.left='50%';
+  n.style.bottom='120px';
+  n.style.transform='translateX(-50%)';
+  n.style.padding='10px 16px';
+  n.style.borderRadius='10px';
+  n.style.background='rgba(0,0,0,0.6)';
+  n.style.color='white';
+  n.style.zIndex=99999;
+  document.body.appendChild(n);
+  setTimeout(()=> n.remove(),1300);
+}
+
+/* ---------- Initialize ---------- */
+applySettings();
+initSettingsUI();
+runBoot(SETTINGS.bootSound);
+
+/* ---------- Initialize: open a couple of windows softly ---------- */
+setTimeout(()=> { openWin('win-explorer', false); openWin('win-terminal', false); }, 1200);
+
+/* ---------- Accessibility: keyboard shortcuts ---------- */
+window.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.key === 'm'){ openWin('win-music'); }
+  if(e.ctrlKey && e.key === 'e'){ openWin('win-explorer'); }
+});
+</script>
+</body>
+</html>
