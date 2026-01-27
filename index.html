@@ -3,101 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Special Question</title>
+    <title>For Simi ❤️</title>
     <style>
-        /* Prevents scrolling and sets up the romantic vibe */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
+            background-color: #ffeef2;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #ffeef2;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden; /* Keeps Simi from scrolling away from the question */
-            text-align: center;
-            touch-action: manipulation;
+            overflow: hidden; /* Prevents scrolling */
+            position: fixed; /* Fixes view on mobile browsers */
         }
 
         #container {
-            background: white;
-            padding: 25px;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(214, 51, 132, 0.2);
-            width: 85%;
+            width: 90%;
             max-width: 350px;
-            position: relative;
-            z-index: 1;
+            background: white;
+            padding: 2rem;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(214, 51, 132, 0.15);
+            text-align: center;
+            z-index: 10;
         }
 
         img {
             width: 100%;
-            max-width: 180px;
-            border-radius: 20px;
-            margin-bottom: 15px;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin-bottom: 20px;
         }
 
         h1 {
             color: #d63384;
-            font-size: 1.6rem;
-            margin: 10px 0;
-            line-height: 1.3;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
         }
 
-        .buttons {
-            margin-top: 25px;
-            height: 60px; /* Space for buttons */
+        .btn-group {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            height: 50px;
+            position: relative;
         }
 
         button {
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 12px 25px;
+            font-size: 1rem;
             font-weight: bold;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s;
+            touch-action: manipulation;
         }
 
         #yesBtn {
             background-color: #ff4d6d;
             color: white;
-            z-index: 2;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
         }
 
         #noBtn {
             background-color: #adb5bd;
             color: white;
-            position: absolute; /* Crucial for moving around */
-            transition: 0.1s ease;
+            position: absolute; /* Dynamic positioning */
+            right: 15%; /* Default position */
         }
 
-        .hidden { display: none; }
+        .hidden {
+            display: none;
+        }
 
-        p { color: #666; font-size: 1rem; }
+        /* Celebration Text */
+        #success-content h1 {
+            color: #ff4d6d;
+        }
     </style>
 </head>
 <body>
 
     <div id="container">
         <div id="main-content">
-            <img id="image-display" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXp3YjR4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JnB0PWEmZW5jcnlwdGVkSW5kZXg9MCZiaW5nPXQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute Cat">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXp3YjR4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JnB0PWEmZW5jcnlwdGVkSW5kZXg9MCZiaW5nPXQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute GIF">
             <h1>Will you be mine forever, Simi? ❤️</h1>
             
-            <div class="buttons">
+            <div class="btn-group">
                 <button id="yesBtn" onclick="celebrate()">Yes</button>
                 <button id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">No</button>
             </div>
         </div>
 
         <div id="success-content" class="hidden">
-            <img src="ab67616d0000b2731ab52dbdec7fde5ae730b94d.jpg" alt="Happy" onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2RrazZxd2JpYTNmNTVmZzFpZzRreHh4eHh4eHh4eHh4eHh4ZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/KztT2c4u8mYYUiMKZL/giphy.gif'">
-            <h1>Yay! I knew you'd say yes! 🥰</h1>
-            <p>Can't wait to spend forever with you, Simi.</p>
+            <img src="ab67616d0000b2731ab52dbdec7fde5ae730b94d.jpg" alt="Us" onerror="this.src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2ZreGZueGZueGZueGZueGZueGZueGZueGZueGZueGZueGZueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/T86p6haxA52K2Hup2G/giphy.gif'">
+            <h1>I knew you'd say yes! 🥰</h1>
+            <p style="color: #666;">You've made me the happiest person!</p>
         </div>
     </div>
 
@@ -105,27 +116,26 @@
         function moveButton() {
             const btn = document.getElementById('noBtn');
             
-            // On mobile, we keep the button within the visible screen area
-            // We subtract button size and a little padding (50px)
-            const maxX = window.innerWidth - btn.offsetWidth - 20;
-            const maxY = window.innerHeight - btn.offsetHeight - 20;
+            // Calculate available space in the window
+            // Subtracting button dimensions to keep it within view
+            const padding = 20;
+            const maxX = window.innerWidth - btn.offsetWidth - padding;
+            const maxY = window.innerHeight - btn.offsetHeight - padding;
 
-            const randomX = Math.floor(Math.random() * maxX);
-            const randomY = Math.floor(Math.random() * maxY);
+            // Generate random position
+            const newX = Math.floor(Math.random() * maxX);
+            const newY = Math.floor(Math.random() * maxY);
 
-            btn.style.left = randomX + 'px';
-            btn.style.top = randomY + 'px';
+            // Move the button
+            btn.style.position = 'fixed';
+            btn.style.left = newX + 'px';
+            btn.style.top = newY + 'px';
         }
 
         function celebrate() {
             document.getElementById('main-content').classList.add('hidden');
             document.getElementById('success-content').classList.remove('hidden');
             document.body.style.backgroundColor = "#ffc8dd";
-            
-            // Trigger a little haptic feedback feel with an alert
-            setTimeout(() => {
-                alert("Best decision ever! ❤️");
-            }, 300);
         }
     </script>
 </body>
