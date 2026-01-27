@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Question</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffeef2;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        #container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        img {
+            width: 200px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #d63384;
+            font-size: 1.5rem;
+        }
+
+        .buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #yesBtn {
+            background-color: #ff4d6d;
+            color: white;
+        }
+
+        #noBtn {
+            background-color: #adb5bd;
+            color: white;
+            position: absolute; /* Needed for the jumping effect */
+        }
+
+        /* Success State */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="main-content">
+            <img id="image-display" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXp3YjR4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JnB0PWEmZW5jcnlwdGVkSW5kZXg9MCZiaW5nPXQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute Cat">
+            <h1>Will you be mine forever simi ? ❤️</h1>
+            
+            <div class="buttons">
+                <button id="yesBtn" onclick="celebrate()">Yes</button>
+                <button id="noBtn" onmouseover="moveButton()">No</button>
+            </div>
+        </div>
+
+        <div id="success-content" class="hidden">
+            <img src="ab67616d0000b2731ab52dbdec7fde5ae730b94d.jpg" alt="Happy">
+            <h1>Yay! I knew you'd say yes! 🥰</h1>
+            <p>Can't wait to spend forever with you.</p>
+        </div>
+    </div>
+
+    <script>
+        function moveButton() {
+            const btn = document.getElementById('noBtn');
+            
+            // Calculate random positions within the viewport
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+
+            btn.style.left = `${x}px`;
+            btn.style.top = `${y}px`;
+        }
+
+        function celebrate() {
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('success-content').classList.remove('hidden');
+            document.body.style.backgroundColor = "#ffc8dd";
+            
+            // Small alert for extra flair
+            alert("Best decision ever! ❤️");
+        }
+    </script>
+</body>
+</html>
